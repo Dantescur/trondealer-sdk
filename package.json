@@ -1,0 +1,40 @@
+{
+  "name": "trondealer-sdk",
+  "type": "module",
+  "version": "0.0.0",
+  "description": "Trondealer SDK API wrapper.",
+  "author": "Cesar Daniel <cesardaniel.9611@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/Dantescur/trondealer-sdk#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dantescur/trondealer-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Dantescur/trondealer-sdk/issues"
+  },
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit",
+    "release": "bumpp",
+    "prepublishOnly": "pnpm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "@typescript/native-preview": "7.0.0-dev.20260328.1",
+    "bumpp": "^11.0.1",
+    "tsdown": "^0.21.7",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.2"
+  },
+  "types": "./dist/index.d.cts"
+}
