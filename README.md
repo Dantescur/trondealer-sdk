@@ -8,11 +8,11 @@ transaction history, and webhook verification.
 ## Installation
 
 ```bash
-npm install trondealer-sdk
+npm install @areitosa/trondealer-sdk
 # or
-pnpm add trondealer-sdk
+pnpm add @areitosa/trondealer-sdk
 # or
-yarn add trondealer-sdk
+yarn add @areitosa/trondealer-sdk
 ```
 
 ## Requirements
@@ -26,7 +26,7 @@ yarn add trondealer-sdk
 ### Initialize the Client
 
 ```typescript
-import { TronDealer } from 'trondealer-sdk';
+import { TronDealer } from '@areitosa/trondealer-sdk';
 
 // Public endpoints (no API key required)
 const publicClient = new TronDealer();
@@ -115,7 +115,7 @@ are detected or confirmed. Always verify the signature to ensure the request
 originates from Tron Dealer.
 
 ```typescript
-import { verifyWebhookSignature } from 'trondealer-sdk';
+import { verifyWebhookSignature } from '@areitosa/trondealer-sdk';
 import express from 'express';
 
 const app = express();
@@ -171,7 +171,7 @@ interface WebhookPayload {
 All API errors are thrown as `TronDealerError` instances:
 
 ```typescript
-import { TronDealerError } from 'trondealer-sdk';
+import { TronDealerError } from '@areitosa/trondealer-sdk';
 
 try {
   await client.wallets.balance({ address: 'invalid' });
@@ -200,7 +200,7 @@ import type {
   WebhookPayload,
   TransactionStatus,
   PayoutMethod
-} from 'trondealer-sdk';
+} from '@areitosa/trondealer-sdk';
 ```
 
 ## Configuration Options
@@ -265,7 +265,7 @@ MIT License. See [LICENSE](./LICENSE) file for details.
 
 - Documentation: <https://github.com/Dantescur/trondealer-sdk>
 - Issues: <https://github.com/Dantescur/trondealer-sdk/issues>
-- API Reference: <https://api.trondealer.com/docs>
+- API Reference: <https://trondealer.com/en/docs>
 
 ## Security Considerations
 
