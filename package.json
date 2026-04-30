@@ -2,7 +2,7 @@
   "name": "trondealer-sdk",
   "type": "module",
   "version": "0.0.0",
-  "description": "Trondealer SDK API wrapper.",
+  "description": "TypeScript SDK for Tron Dealer V2 API - EVM wallet management across BSC, Ethereum, Polygon, Arbitrum, and Base",
   "author": "Cesar Daniel <cesardaniel.9611@gmail.com>",
   "license": "MIT",
   "homepage": "https://github.com/Dantescur/trondealer-sdk#readme",
@@ -13,12 +13,30 @@
   "bugs": {
     "url": "https://github.com/Dantescur/trondealer-sdk/issues"
   },
+  "keywords": [
+    "trondealer",
+    "evm",
+    "wallet",
+    "blockchain",
+    "bsc",
+    "ethereum",
+    "polygon",
+    "arbitrum",
+    "base",
+    "usdt",
+    "usdc",
+    "webhooks",
+    "sdk",
+    "typescript"
+  ],
   "exports": {
     ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsdown",
@@ -36,5 +54,11 @@
     "typescript": "^6.0.2",
     "vitest": "^4.1.2"
   },
-  "types": "./dist/index.d.cts"
+  "types": "./dist/index.d.mts",
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }
