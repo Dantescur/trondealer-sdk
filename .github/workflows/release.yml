@@ -1,0 +1,72 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    environment: npm-publish
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: lts/*
+          cache: pnpm
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm run typecheck
+
+      - name: Run tests
+        run: pnpm run test
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Verify build artifacts
+        run: |
+          test -f dist/index.mjs || (echo "ERROR: dist/index.mjs not found" && exit 1)
+          test -f dist/index.d.mts || (echo "ERROR: dist/index.d.mts not found" && exit 1)
+
+      - name: Publish to npm
+        run: |
+          TAG_FLAG=""
+          if [[ "${{ github.ref_name }}" =~ alpha ]]; then
+            TAG_FLAG="--tag alpha"
+          elif [[ "${{ github.ref_name }}" =~ beta ]]; then
+            TAG_FLAG="--tag beta"
+          elif [[ "${{ github.ref_name }}" =~ rc ]]; then
+            TAG_FLAG="--tag rc"
+          fi
+          npm publish --access public --provenance $TAG_FLAG
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          generate_release_notes: true
+          draft: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
