@@ -1,24 +1,21 @@
-import type { RequestOptions } from '../utils/http';
-import { trondealerRequest } from '../utils/http';
+import type { TronDealerHttpClient } from '../http';
 import type { AssignedWallet, AssignRequest, AddressRequest, Balances, TransactionsRequest, Transaction } from '../types';
 
 export class WalletsResource {
-  constructor(private opts: RequestOptions) { }
+  constructor(private readonly http: TronDealerHttpClient) {}
 
   assign(data?: AssignRequest) {
-    return trondealerRequest<AssignedWallet>('/api/v2/wallets/assign', 'POST', data ?? {}, this.opts);
+    return this.http.post<AssignedWallet>('/api/v2/wallets/assign', data ?? {});
   }
 
   balance(data: AddressRequest) {
-    return trondealerRequest<Balances>('/api/v2/wallets/balance', 'POST', data, this.opts);
+    return this.http.post<Balances>('/api/v2/wallets/balance', data);
   }
 
   transactions(data: TransactionsRequest) {
-    return trondealerRequest<{ data: Transaction[]; total: number }>(
+    return this.http.post<{ data: Transaction[]; total: number }>(
       '/api/v2/wallets/transactions',
-      'POST',
       data,
-      this.opts
     );
   }
 }

@@ -199,7 +199,10 @@ import type {
   Transaction,
   WebhookPayload,
   TransactionStatus,
-  PayoutMethod
+  PayoutMethod,
+  TronDealerConfig,
+  TronDealerOptions,
+  Transport
 } from '@areitosa/trondealer-sdk';
 ```
 
@@ -236,13 +239,14 @@ pnpm run release    # Bump version and prepare release
 ```sh
 src/
 ├── index.ts              # Public exports
-├── client.ts             # Main TronDealer class
-├── types.ts              # TypeScript interfaces
+├── client.ts             # Main TronDealer class (config normalization, resource wiring)
+├── config.ts             # TronDealerConfig type + normalize function
+├── http.ts               # TronDealerHttpClient, Transport interface, TronDealerError
+├── types.ts              # API request/response types
 ├── resources/
 │   ├── clients.ts        # Client management endpoints
 │   └── wallets.ts        # Wallet and transaction endpoints
 └── utils/
-    ├── http.ts           # Fetch wrapper and error handling
     └── webhooks.ts       # HMAC signature verification
 ```
 

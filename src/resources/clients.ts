@@ -1,19 +1,18 @@
-import type { RequestOptions } from '../utils/http';
-import { trondealerRequest } from '../utils/http';
+import type { TronDealerHttpClient } from '../http';
 import type { ClientConfig, ClientFull, RegisterRequest, UpdateConfigRequest } from '../types';
 
 export class ClientsResource {
-  constructor(private opts: RequestOptions) { }
+  constructor(private readonly http: TronDealerHttpClient) {}
 
   register(data: RegisterRequest) {
-    return trondealerRequest<ClientFull>('/api/v2/clients/register-open', 'POST', data, this.opts);
+    return this.http.post<ClientFull>('/api/v2/clients/register-open', data);
   }
 
   me() {
-    return trondealerRequest<ClientConfig>('/api/v2/clients/me', 'GET', undefined, this.opts);
+    return this.http.get<ClientConfig>('/api/v2/clients/me');
   }
 
   update(data: UpdateConfigRequest) {
-    return trondealerRequest<ClientConfig>('/api/v2/clients/me', 'PATCH', data, this.opts);
+    return this.http.patch<ClientConfig>('/api/v2/clients/me', data);
   }
 }
