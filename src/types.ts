@@ -11,7 +11,8 @@ export interface RegisterRequest {
   webhook_secret?: string | null;
   min_confirmations?: number | null;
   payout_method?: PayoutMethod | null;
-  sweep_wallet?: string | null;
+  sweep_wallet_evm?: string | null;
+  sweep_wallet_tron?: string | null;
   qvapay_account?: string | null;
   zelle_contact?: string | null;
 }
@@ -30,7 +31,8 @@ export interface ClientConfig {
   webhook_secret_masked?: string | null;
   has_webhook_secret: boolean;
   min_confirmations?: number | null;
-  sweep_wallet?: string | null;
+  sweep_wallet_evm?: string | null;
+  sweep_wallet_tron?: string | null;
   payout_method?: PayoutMethod | null;
   qvapay_account?: string | null;
   zelle_contact?: string | null;
@@ -41,7 +43,8 @@ export interface UpdateConfigRequest {
   webhook_url?: string | null;
   webhook_secret?: string | null;
   payout_method?: PayoutMethod | null;
-  sweep_wallet?: string | null;
+  sweep_wallet_evm?: string | null;
+  sweep_wallet_tron?: string | null;
   qvapay_account?: string | null;
   zelle_contact?: string | null;
   min_confirmations?: number;

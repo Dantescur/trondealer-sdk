@@ -48,7 +48,7 @@ const registered = await publicClient.clients.register({
   webhook_secret: 'your_webhook_secret',
   min_confirmations: 12,
   payout_method: 'wallet',
-  sweep_wallet: '0xYourEVMAddressHere'
+  sweep_wallet_evm: '0xYourEVMAddressHere'
 });
 
 console.log('API Key:', registered.api_key);
