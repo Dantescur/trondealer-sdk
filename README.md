@@ -34,7 +34,7 @@ const publicClient = new TronDealer();
 // Authenticated requests (after registration)
 const client = new TronDealer({
   apiKey: 'td_your_api_key_here',
-  baseUrl: 'https://api.trondealer.com', // optional, default shown
+  baseUrl: 'https://trondealer.com', // optional, default shown
   timeout: 15000 // optional, default: 10000ms
 });
 ```
@@ -211,7 +211,7 @@ import type {
 | Option | Type | Default | Description |
 | -------- | ------ | --------- | ------------- |
 | `apiKey` | `string` | `undefined` | API key for authenticated requests |
-| `baseUrl` | `string` | `'https://api.trondealer.com'` | API base URL |
+| `baseUrl` | `string` | `'https://trondealer.com'` | API base URL |
 | `timeout` | `number` | `10000` | Request timeout in milliseconds |
 
 ## Development
