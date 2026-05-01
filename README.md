@@ -73,9 +73,10 @@ const balanceResponse = await client.wallets.balance({
   address: '0xAssignedWalletAddress'
 });
 
-console.log('Native Token:', balanceResponse.balances.NativeToken);
-console.log('USDT:', balanceResponse.balances.USDT);
-console.log('USDC:', balanceResponse.balances.USDC);
+// Balances are per-network with network-specific native tokens
+console.log('BSC BNB:', balanceResponse.balances.bsc.BNB);
+console.log('ETH USDT:', balanceResponse.balances.eth.USDT);
+console.log('POL USDC:', balanceResponse.balances.pol.USDC);
 ```
 
 ### Query Transaction History

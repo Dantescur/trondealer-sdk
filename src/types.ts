@@ -1,4 +1,5 @@
-export type Network = "bsc" | "eth" | "pol" | "arbitrum" | "base";
+export type Network = "bsc" | "eth" | "pol" | "arbitrum" | "base" | "avalanche" | "optimism";
+export type WebhookNetwork = "bsc" | "eth" | "pol";
 export type Asset = "USDT" | "USDC";
 export type TransactionStatus = "detected" | "confirmed" | "notified" | "swept";
 export type WalletStatus = "active" | "inactive";
@@ -89,9 +90,13 @@ export interface WalletInfo {
 }
 
 export interface Balances {
-  NativeToken: string;
-  USDT: string;
-  USDC: string;
+  bsc: { BNB: number; USDT: number; USDC: number };
+  eth: { ETH: number; USDT: number; USDC: number };
+  pol: { POL: number; USDT: number; USDC: number };
+  base: { ETH: number; USDT: number; USDC: number };
+  arb: { ETH: number; USDT: number; USDC: number };
+  opt: { ETH: number; USDT: number; USDC: number };
+  avax: { AVAX: number; USDT: number; USDC: number };
 }
 
 export interface TransactionsRequest {
@@ -165,7 +170,7 @@ export interface WebhookTransactionData {
   amount: string;
   confirmations: number;
   wallet_label?: string | null;
-  network: Network;
+  network: WebhookNetwork;
 }
 
 export interface ErrorResponse {
