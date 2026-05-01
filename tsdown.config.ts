@@ -7,7 +7,7 @@ export default defineConfig({
   clean: true,
   minify: true,
   banner: {
-    js: "// Trondealer V2 SDK\n// https://github.com/Dantescur/trondealer-sdk\n",
+    js: "/* Tron Dealer V2 SDK — https://github.com/Dantescur/trondealer-sdk */",
   },
   exports: true,
 });
