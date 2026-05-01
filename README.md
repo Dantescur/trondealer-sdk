@@ -51,37 +51,37 @@ const registered = await publicClient.clients.register({
   sweep_wallet_evm: '0xYourEVMAddressHere'
 });
 
-console.log('API Key:', registered.api_key);
+console.log('API Key:', registered.client.api_key);
 // Store this key securely - it is only returned once
 ```
 
 ### Assign a Deposit Wallet
 
 ```typescript
-const wallet = await client.wallets.assign({
+const assigned = await client.wallets.assign({
   label: 'user-12345' // optional identifier
 });
 
-console.log('Wallet Address:', wallet.address);
-console.log('Status:', wallet.status);
+console.log('Wallet Address:', assigned.wallet.address);
+console.log('Status:', assigned.wallet.status);
 ```
 
 ### Check Wallet Balances
 
 ```typescript
-const balances = await client.wallets.balance({
+const balanceResponse = await client.wallets.balance({
   address: '0xAssignedWalletAddress'
 });
 
-console.log('Native Token:', balances.NativeToken);
-console.log('USDT:', balances.USDT);
-console.log('USDC:', balances.USDC);
+console.log('Native Token:', balanceResponse.balances.NativeToken);
+console.log('USDT:', balanceResponse.balances.USDT);
+console.log('USDC:', balanceResponse.balances.USDC);
 ```
 
 ### Query Transaction History
 
 ```typescript
-const transactions = await client.wallets.transactions({
+const transactionsResponse = await client.wallets.transactions({
   address: '0xAssignedWalletAddress',
   limit: 25,
   offset: 0,
@@ -89,7 +89,7 @@ const transactions = await client.wallets.transactions({
   | 'swept'
 });
 
-for (const tx of transactions.data) {
+for (const tx of transactionsResponse.transactions) {
   console.log(`${tx.asset} ${tx.amount} - ${tx.status}`);
 }
 ```
@@ -98,11 +98,11 @@ for (const tx of transactions.data) {
 
 ```typescript
 // Get current configuration
-const config = await client.clients.me();
-console.log('Webhook configured:', config.has_webhook_secret);
+const configResponse = await client.clients.me();
+console.log('Webhook configured:', configResponse.client.has_webhook_secret);
 
 // Update configuration
-const updated = await client.clients.update({
+const updatedResponse = await client.clients.update({
   webhook_url: 'https://new-endpoint.com/webhook',
   min_confirmations: 20
 });

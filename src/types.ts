@@ -1,9 +1,9 @@
-export type Network = 'bsc' | 'eth' | 'pol' | 'arbitrum' | 'base';
-export type Asset = 'USDT' | 'USDC';
-export type TransactionStatus = 'detected' | 'confirmed' | 'notified' | 'swept';
-export type WalletStatus = 'active' | 'inactive';
-export type PayoutMethod = 'wallet' | 'qvapay' | 'zelle';
-export type WebhookEvent = 'transaction.incoming' | 'transaction.confirmed';
+export type Network = "bsc" | "eth" | "pol" | "arbitrum" | "base";
+export type Asset = "USDT" | "USDC";
+export type TransactionStatus = "detected" | "confirmed" | "notified" | "swept";
+export type WalletStatus = "active" | "inactive";
+export type PayoutMethod = "wallet" | "qvapay" | "zelle";
+export type WebhookEvent = "transaction.incoming" | "transaction.confirmed";
 
 export interface RegisterRequest {
   name: string;
@@ -11,15 +11,27 @@ export interface RegisterRequest {
   webhook_secret?: string | null;
   min_confirmations?: number | null;
   payout_method?: PayoutMethod | null;
+  /**
+  * @deprecated alias of sweep_wallet_evm kept for backwards compatibility. New integrations should send sweep_wallet_evm and/or sweep_wallet_tron explicitly.
+  */
+  sweep_wallet?: string | null;
   sweep_wallet_evm?: string | null;
   sweep_wallet_tron?: string | null;
   qvapay_account?: string | null;
   zelle_contact?: string | null;
 }
 
-export interface ClientFull extends RegisterRequest {
+export interface ClientFull {
   id: string;
+  name: string;
   api_key: string;
+  webhook_url?: string | null;
+  min_confirmations?: number | null;
+  sweep_wallet_evm?: string | null;
+  sweep_wallet_tron?: string | null;
+  payout_method?: PayoutMethod | null;
+  qvapay_account?: string | null;
+  zelle_contact?: string | null;
   is_active: boolean;
   created_at: string;
 }
@@ -43,6 +55,10 @@ export interface UpdateConfigRequest {
   webhook_url?: string | null;
   webhook_secret?: string | null;
   payout_method?: PayoutMethod | null;
+  /**
+  * @deprecated alias of sweep_wallet_evm kept for backwards compatibility. New integrations should send sweep_wallet_evm and/or sweep_wallet_tron explicitly.
+  */
+  sweep_wallet?: string | null;
   sweep_wallet_evm?: string | null;
   sweep_wallet_tron?: string | null;
   qvapay_account?: string | null;
@@ -64,6 +80,12 @@ export interface AssignedWallet {
 
 export interface AddressRequest {
   address: string;
+}
+
+export interface WalletInfo {
+  address: string;
+  label?: string | null;
+  status: WalletStatus;
 }
 
 export interface Balances {
@@ -91,6 +113,41 @@ export interface Transaction {
   status: TransactionStatus;
   detected_at: string;
   created_at: string;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  [key: string]: any; // Allows for 'client', 'wallet', etc.
+}
+
+export interface RegisterResponse {
+  success: boolean;
+  client: ClientFull;
+}
+
+export interface ClientConfigResponse {
+  success: boolean;
+  client: ClientConfig;
+}
+
+export interface AssignWalletResponse {
+  success: boolean;
+  wallet: AssignedWallet;
+}
+
+export interface BalanceResponse {
+  success: boolean;
+  wallet: WalletInfo;
+  balances: Balances;
+}
+
+export interface TransactionsResponse {
+  success: boolean;
+  wallet: WalletInfo;
+  total: number;
+  limit: number;
+  offset: number;
+  transactions: Transaction[];
 }
 
 export interface WebhookPayload {
