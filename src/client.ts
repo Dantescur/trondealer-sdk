@@ -1,9 +1,9 @@
-import type { TronDealerOptions } from './config';
-import { normalizeConfig } from './config';
-import { FetchTransport, TronDealerHttpClient } from './http';
-import { ClientsResource } from './resources/clients';
-import { WalletsResource } from './resources/wallets';
-import { verifyWebhookSignature } from './utils/webhooks';
+import type { TronDealerOptions } from "./config";
+import { normalizeConfig } from "./config";
+import { FetchTransport, TronDealerHttpClient } from "./http";
+import { ClientsResource } from "./resources/clients";
+import { WalletsResource } from "./resources/wallets";
+import { verifyWebhookSignature } from "./utils/webhooks";
 
 export class TronDealer {
   public readonly clients: ClientsResource;

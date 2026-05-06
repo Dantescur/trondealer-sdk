@@ -6,7 +6,7 @@ export class TronDealerError extends Error {
     public readonly response?: unknown,
   ) {
     super(message);
-    this.name = 'TronDealerError';
+    this.name = "TronDealerError";
   }
 }
 
@@ -17,7 +17,12 @@ export interface Transport {
 export class FetchTransport implements Transport {
   constructor(private timeout: number) {}
 
-  async request(path: string, method: string, body?: unknown, headers?: HeadersInit): Promise<unknown> {
+  async request(
+    path: string,
+    method: string,
+    body?: unknown,
+    headers?: HeadersInit,
+  ): Promise<unknown> {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.timeout);
 
@@ -33,9 +38,9 @@ export class FetchTransport implements Transport {
 
       if (!res.ok) {
         let errorMessage = `HTTP ${res.status} ${res.statusText}`;
-        if (data && typeof data === 'object' && 'error' in data) {
+        if (data && typeof data === "object" && "error" in data) {
           const maybeError = (data as { error?: unknown }).error;
-          if (typeof maybeError === 'string' && maybeError) {
+          if (typeof maybeError === "string" && maybeError) {
             errorMessage = maybeError;
           }
         }
@@ -57,30 +62,25 @@ export class TronDealerHttpClient {
   ) {}
 
   async get<T>(path: string): Promise<T> {
-    return this.request<T>(path, 'GET');
+    return this.request<T>(path, "GET");
   }
 
   async post<T>(path: string, body?: unknown): Promise<T> {
-    return this.request<T>(path, 'POST', body);
+    return this.request<T>(path, "POST", body);
   }
 
   async patch<T>(path: string, body?: unknown): Promise<T> {
-    return this.request<T>(path, 'PATCH', body);
+    return this.request<T>(path, "PATCH", body);
   }
 
   private async request<T>(path: string, method: string, body?: unknown): Promise<T> {
     const headers = new Headers({
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-      ...(this.apiKey ? { 'X-API-Key': this.apiKey } : {}),
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      ...(this.apiKey ? { "X-API-Key": this.apiKey } : {}),
     });
 
-    const data = await this.transport.request(
-      `${this.baseUrl}${path}`,
-      method,
-      body,
-      headers,
-    );
+    const data = await this.transport.request(`${this.baseUrl}${path}`, method, body, headers);
 
     return data as T;
   }

@@ -10,7 +10,7 @@ export interface TronDealerOptions {
   timeout?: number;
 }
 
-const DEFAULT_BASE_URL = 'https://trondealer.com';
+const DEFAULT_BASE_URL = "https://trondealer.com";
 const DEFAULT_TIMEOUT = 10_000;
 
 export function normalizeConfig(options: TronDealerOptions = {}): TronDealerConfig {

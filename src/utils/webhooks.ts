@@ -1,21 +1,21 @@
 export async function verifyWebhookSignature(
   rawBody: string,
   signatureHex: string,
-  secret: string
+  secret: string,
 ): Promise<boolean> {
   const encoder = new TextEncoder();
   const key = await crypto.subtle.importKey(
-    'raw',
+    "raw",
     encoder.encode(secret),
-    { name: 'HMAC', hash: 'SHA-256' },
+    { name: "HMAC", hash: "SHA-256" },
     false,
-    ['sign']
+    ["sign"],
   );
 
-  const mac = await crypto.subtle.sign('HMAC', key, encoder.encode(rawBody));
+  const mac = await crypto.subtle.sign("HMAC", key, encoder.encode(rawBody));
   const macArray = new Uint8Array(mac);
   const sigArray = Uint8Array.from(
-    signatureHex.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16))
+    signatureHex.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16)),
   );
 
   // Timing-safe comparison

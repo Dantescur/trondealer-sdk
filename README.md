@@ -26,16 +26,16 @@ yarn add @areitosa/trondealer-sdk
 ### Initialize the Client
 
 ```typescript
-import { TronDealer } from '@areitosa/trondealer-sdk';
+import { TronDealer } from "@areitosa/trondealer-sdk";
 
 // Public endpoints (no API key required)
 const publicClient = new TronDealer();
 
 // Authenticated requests (after registration)
 const client = new TronDealer({
-  apiKey: 'td_your_api_key_here',
-  baseUrl: 'https://trondealer.com', // optional, default shown
-  timeout: 15000 // optional, default: 10000ms
+  apiKey: "td_your_api_key_here",
+  baseUrl: "https://trondealer.com", // optional, default shown
+  timeout: 15000, // optional, default: 10000ms
 });
 ```
 
@@ -43,15 +43,15 @@ const client = new TronDealer({
 
 ```typescript
 const registered = await publicClient.clients.register({
-  name: 'My Business',
-  webhook_url: 'https://myapp.com/webhooks/trondealer',
-  webhook_secret: 'your_webhook_secret',
+  name: "My Business",
+  webhook_url: "https://myapp.com/webhooks/trondealer",
+  webhook_secret: "your_webhook_secret",
   min_confirmations: 12,
-  payout_method: 'wallet',
-  sweep_wallet_evm: '0xYourEVMAddressHere'
+  payout_method: "wallet",
+  sweep_wallet_evm: "0xYourEVMAddressHere",
 });
 
-console.log('API Key:', registered.client.api_key);
+console.log("API Key:", registered.client.api_key);
 // Store this key securely - it is only returned once
 ```
 
@@ -59,35 +59,36 @@ console.log('API Key:', registered.client.api_key);
 
 ```typescript
 const assigned = await client.wallets.assign({
-  label: 'user-12345' // optional identifier
+  label: "user-12345", // optional identifier
 });
 
-console.log('Wallet Address:', assigned.wallet.address);
-console.log('Status:', assigned.wallet.status);
+console.log("Wallet Address:", assigned.wallet.address);
+console.log("Status:", assigned.wallet.status);
 ```
 
 ### Check Wallet Balances
 
 ```typescript
 const balanceResponse = await client.wallets.balance({
-  address: '0xAssignedWalletAddress'
+  address: "0xAssignedWalletAddress",
 });
 
 // Balances are per-network with network-specific native tokens
-console.log('BSC BNB:', balanceResponse.balances.bsc.BNB);
-console.log('ETH USDT:', balanceResponse.balances.eth.USDT);
-console.log('POL USDC:', balanceResponse.balances.pol.USDC);
+console.log("BSC BNB:", balanceResponse.balances.bsc.BNB);
+console.log("ETH USDT:", balanceResponse.balances.eth.USDT);
+console.log("POL USDC:", balanceResponse.balances.pol.USDC);
 ```
 
 ### Query Transaction History
 
 ```typescript
 const transactionsResponse = await client.wallets.transactions({
-  address: '0xAssignedWalletAddress',
+  address: "0xAssignedWalletAddress",
   limit: 25,
   offset: 0,
-  status: 'confirmed' // optional filter: 'detected' | 'confirmed' | 'notified'
-  | 'swept'
+  status:
+    "confirmed" | // optional filter: 'detected' | 'confirmed' | 'notified'
+    "swept",
 });
 
 for (const tx of transactionsResponse.transactions) {
@@ -100,12 +101,12 @@ for (const tx of transactionsResponse.transactions) {
 ```typescript
 // Get current configuration
 const configResponse = await client.clients.me();
-console.log('Webhook configured:', configResponse.client.has_webhook_secret);
+console.log("Webhook configured:", configResponse.client.has_webhook_secret);
 
 // Update configuration
 const updatedResponse = await client.clients.update({
-  webhook_url: 'https://new-endpoint.com/webhook',
-  min_confirmations: 20
+  webhook_url: "https://new-endpoint.com/webhook",
+  min_confirmations: 20,
 });
 ```
 
@@ -116,28 +117,27 @@ are detected or confirmed. Always verify the signature to ensure the request
 originates from Tron Dealer.
 
 ```typescript
-import { verifyWebhookSignature } from '@areitosa/trondealer-sdk';
-import express from 'express';
+import { verifyWebhookSignature } from "@areitosa/trondealer-sdk";
+import express from "express";
 
 const app = express();
 
 // Use raw body parser for signature verification
-app.post('/webhooks/trondealer', express.raw({ type: 'application/json' }), 
-async (req, res) => {
-  const signature = req.headers['x-webhook-signature'] as string;
+app.post("/webhooks/trondealer", express.raw({ type: "application/json" }), async (req, res) => {
+  const signature = req.headers["x-webhook-signature"] as string;
   const secret = process.env.TRONDEALER_WEBHOOK_SECRET!;
-  const rawBody = req.body.toString('utf-8');
+  const rawBody = req.body.toString("utf-8");
 
   const isValid = await verifyWebhookSignature(rawBody, signature, secret);
-  
+
   if (!isValid) {
-    return res.status(401).send('Invalid signature');
+    return res.status(401).send("Invalid signature");
   }
 
   const payload = JSON.parse(rawBody);
-  
+
   // Process the webhook event
-  if (payload.event === 'transaction.confirmed') {
+  if (payload.event === "transaction.confirmed") {
     const { data } = payload;
     console.log(`Confirmed: ${data.amount} ${data.asset} on ${data.network}`);
     // Your business logic here
@@ -151,18 +151,18 @@ async (req, res) => {
 
 ```typescript
 interface WebhookPayload {
-  event: 'transaction.incoming' | 'transaction.confirmed';
+  event: "transaction.incoming" | "transaction.confirmed";
   timestamp: string; // ISO 8601
   data: {
     tx_hash: string;
     block_number: number;
     from_address: string;
     to_address: string;
-    asset: 'USDT' | 'USDC';
+    asset: "USDT" | "USDC";
     amount: string;
     confirmations: number;
     wallet_label?: string | null;
-    network: 'bsc' | 'eth' | 'pol';
+    network: "bsc" | "eth" | "pol";
   };
 }
 ```
@@ -172,18 +172,18 @@ interface WebhookPayload {
 All API errors are thrown as `TronDealerError` instances:
 
 ```typescript
-import { TronDealerError } from '@areitosa/trondealer-sdk';
+import { TronDealerError } from "@areitosa/trondealer-sdk";
 
 try {
-  await client.wallets.balance({ address: 'invalid' });
+  await client.wallets.balance({ address: "invalid" });
 } catch (error) {
   if (error instanceof TronDealerError) {
-    console.error('API Error:', error.message);
-    console.error('Status:', error.status);
-    console.error('Response:', error.response);
+    console.error("API Error:", error.message);
+    console.error("Status:", error.status);
+    console.error("Response:", error.response);
   } else {
     // Network errors, timeouts, etc.
-    console.error('Request failed:', error);
+    console.error("Request failed:", error);
   }
 }
 ```
@@ -203,17 +203,17 @@ import type {
   PayoutMethod,
   TronDealerConfig,
   TronDealerOptions,
-  Transport
-} from '@areitosa/trondealer-sdk';
+  Transport,
+} from "@areitosa/trondealer-sdk";
 ```
 
 ## Configuration Options
 
-| Option | Type | Default | Description |
-| -------- | ------ | --------- | ------------- |
-| `apiKey` | `string` | `undefined` | API key for authenticated requests |
-| `baseUrl` | `string` | `'https://trondealer.com'` | API base URL |
-| `timeout` | `number` | `10000` | Request timeout in milliseconds |
+| Option    | Type     | Default                    | Description                        |
+| --------- | -------- | -------------------------- | ---------------------------------- |
+| `apiKey`  | `string` | `undefined`                | API key for authenticated requests |
+| `baseUrl` | `string` | `'https://trondealer.com'` | API base URL                       |
+| `timeout` | `number` | `10000`                    | Request timeout in milliseconds    |
 
 ## Development
 
@@ -275,7 +275,7 @@ MIT License. See [LICENSE](./LICENSE) file for details.
 ## Security Considerations
 
 1. Store your API key and webhook secret in environment variables, never in
-source code
+   source code
 2. Always verify webhook signatures before processing events
 3. Use HTTPS for all webhook endpoints
 4. Rotate your webhook secret periodically

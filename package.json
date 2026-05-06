@@ -1,63 +1,77 @@
 {
   "name": "@areitosa/trondealer-sdk",
-  "type": "module",
   "version": "0.0.5",
   "description": "TypeScript SDK for Tron Dealer V2 API - EVM wallet management across BSC, Ethereum, Polygon, Arbitrum, and Base",
-  "author": "Cesar Daniel <cesardaniel.9611@gmail.com>",
-  "license": "MIT",
-  "homepage": "https://github.com/Dantescur/trondealer-sdk#readme",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Dantescur/trondealer-sdk.git"
-  },
-  "bugs": {
-    "url": "https://github.com/Dantescur/trondealer-sdk/issues"
-  },
   "keywords": [
-    "trondealer",
-    "evm",
-    "wallet",
+    "arbitrum",
+    "base",
     "blockchain",
     "bsc",
     "ethereum",
+    "evm",
     "polygon",
-    "arbitrum",
-    "base",
-    "usdt",
-    "usdc",
-    "webhooks",
     "sdk",
-    "typescript"
+    "trondealer",
+    "typescript",
+    "usdc",
+    "usdt",
+    "wallet",
+    "webhooks"
   ],
-  "exports": {
-    ".": "./dist/index.mjs",
-    "./package.json": "./package.json"
+  "homepage": "https://github.com/Dantescur/trondealer-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/Dantescur/trondealer-sdk/issues"
+  },
+  "license": "MIT",
+  "author": "Cesar Daniel <cesardaniel.9611@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dantescur/trondealer-sdk.git"
   },
   "files": [
     "dist",
     "README.md",
     "LICENSE"
   ],
+  "type": "module",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch",
     "test": "vitest",
     "typecheck": "tsc --noEmit",
     "release": "bumpp",
-    "prepublishOnly": "pnpm run build"
+    "prepublishOnly": "pnpm run build",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "prepare": "husky",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
     "@typescript/native-preview": "7.0.0-dev.20260328.1",
     "bumpp": "^11.0.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "oxfmt": "^0.45.0",
+    "oxlint": "^1.60.0",
+    "oxlint-tsgolint": "^0.21.1",
     "publint": "^0.3.18",
     "tsdown": "^0.21.7",
     "typescript": "^6.0.2",
     "vitest": "^4.1.2"
   },
-  "types": "./dist/index.d.mts",
-  "publishConfig": {
-    "access": "public"
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,mjs,cjs}": "pnpm run lint:fix",
+    "*": "oxfmt --no-error-on-unmatched-pattern"
   },
   "engines": {
     "node": ">=18.0.0"
