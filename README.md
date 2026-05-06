@@ -232,8 +232,14 @@ pnpm run build      # Build ESM bundles with tsdown
 pnpm run dev        # Watch mode for development
 pnpm run typecheck  # Run TypeScript type checking
 pnpm run test       # Run tests with Vitest
+pnpm run lint       # Lint with oxlint
+pnpm run lint:fix   # Lint and auto-fix with oxlint
+pnpm run fmt        # Format with oxfmt
+pnpm run fmt:check  # Check formatting without writing
 pnpm run release    # Bump version and prepare release
 ```
+
+Hooks (husky + lint-staged) auto-run `lint:fix` and `oxfmt` on staged files before each commit.
 
 ### Project Structure
 
