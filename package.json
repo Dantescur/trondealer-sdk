@@ -1,6 +1,6 @@
 {
   "name": "@areitosa/trondealer-sdk",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "TypeScript SDK for Tron Dealer V2 API - EVM wallet management across BSC, Ethereum, Polygon, Arbitrum, and Base",
   "keywords": [
     "arbitrum",
