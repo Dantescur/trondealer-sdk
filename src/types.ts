@@ -3,24 +3,78 @@ export type WebhookNetwork = "bsc" | "eth" | "pol";
 export type Asset = "USDT" | "USDC";
 export type TransactionStatus = "detected" | "confirmed" | "notified" | "swept";
 export type WalletStatus = "active" | "inactive";
-export type PayoutMethod = "wallet" | "qvapay" | "zelle";
 export type WebhookEvent = "transaction.incoming" | "transaction.confirmed";
 
-export interface RegisterRequest {
+// --- Payout method discriminated unions ---
+
+interface BaseRequest {
   name: string;
   webhook_url?: string | null;
   webhook_secret?: string | null;
   min_confirmations?: number | null;
+}
+
+interface WalletPayout {
+  payout_method: "wallet";
+  sweep_wallet_evm?: string | null;
+  sweep_wallet_tron?: string | null;
+  /**
+   * @deprecated alias of sweep_wallet_evm kept for backwards compatibility.
+   * New integrations should send sweep_wallet_evm and/or sweep_wallet_tron explicitly.
+   */
+  sweep_wallet?: string | null;
+  qvapay_account?: never;
+  zelle_contact?: never;
+}
+
+interface QvapayPayout {
+  payout_method: "qvapay";
+  qvapay_account: string;
+  sweep_wallet_evm?: never;
+  sweep_wallet_tron?: never;
+  sweep_wallet?: never;
+  zelle_contact?: never;
+}
+
+interface ZellePayout {
+  payout_method: "zelle";
+  zelle_contact: string;
+  qvapay_account?: never;
+  sweep_wallet_evm?: never;
+  sweep_wallet_tron?: never;
+  sweep_wallet?: never;
+}
+
+interface NoPayout {
+  payout_method?: null;
+  sweep_wallet_evm?: never;
+  sweep_wallet_tron?: never;
+  sweep_wallet?: never;
+  qvapay_account?: never;
+  zelle_contact?: never;
+}
+
+export type RegisterRequest = BaseRequest & (WalletPayout | QvapayPayout | ZellePayout | NoPayout);
+
+export interface UpdateConfigRequest {
+  webhook_url?: string | null;
+  webhook_secret?: string | null;
   payout_method?: PayoutMethod | null;
   /**
-  * @deprecated alias of sweep_wallet_evm kept for backwards compatibility. New integrations should send sweep_wallet_evm and/or sweep_wallet_tron explicitly.
-  */
+   * @deprecated alias of sweep_wallet_evm kept for backwards compatibility.
+   * New integrations should send sweep_wallet_evm and/or sweep_wallet_tron explicitly.
+   */
   sweep_wallet?: string | null;
   sweep_wallet_evm?: string | null;
   sweep_wallet_tron?: string | null;
   qvapay_account?: string | null;
   zelle_contact?: string | null;
+  min_confirmations?: number;
 }
+
+export type PayoutMethod = "wallet" | "qvapay" | "zelle";
+
+// --- Client response types ---
 
 export interface ClientFull {
   id: string;
@@ -52,20 +106,7 @@ export interface ClientConfig {
   created_at: string;
 }
 
-export interface UpdateConfigRequest {
-  webhook_url?: string | null;
-  webhook_secret?: string | null;
-  payout_method?: PayoutMethod | null;
-  /**
-  * @deprecated alias of sweep_wallet_evm kept for backwards compatibility. New integrations should send sweep_wallet_evm and/or sweep_wallet_tron explicitly.
-  */
-  sweep_wallet?: string | null;
-  sweep_wallet_evm?: string | null;
-  sweep_wallet_tron?: string | null;
-  qvapay_account?: string | null;
-  zelle_contact?: string | null;
-  min_confirmations?: number;
-}
+// --- Wallet & Transaction types ---
 
 export interface AssignRequest {
   label?: string;
@@ -120,9 +161,11 @@ export interface Transaction {
   created_at: string;
 }
 
+// --- Response envelope types ---
+
 export interface ApiResponse<T> {
   success: boolean;
-  [key: string]: any; // Allows for 'client', 'wallet', etc.
+  [key: string]: unknown;
 }
 
 export interface RegisterResponse {
@@ -155,6 +198,8 @@ export interface TransactionsResponse {
   transactions: Transaction[];
 }
 
+// --- Webhook types ---
+
 export interface WebhookPayload {
   event: WebhookEvent;
   timestamp: string;
@@ -172,6 +217,8 @@ export interface WebhookTransactionData {
   wallet_label?: string | null;
   network: WebhookNetwork;
 }
+
+// --- Error types ---
 
 export interface ErrorResponse {
   error: string;

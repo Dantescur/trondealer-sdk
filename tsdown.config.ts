@@ -5,6 +5,7 @@ export default defineConfig({
     tsgo: true,
   },
   clean: true,
+  publint: true,
   minify: true,
   banner: {
     js: "/* Tron Dealer V2 SDK — https://github.com/Dantescur/trondealer-sdk */",
