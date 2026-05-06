@@ -56,8 +56,6 @@ interface NoPayout {
 
 export type RegisterRequest = BaseRequest & (WalletPayout | QvapayPayout | ZellePayout | NoPayout);
 
-// --- Update config request (partial updates, all fields optional) ---
-
 export interface UpdateConfigRequest {
   webhook_url?: string | null;
   webhook_secret?: string | null;
@@ -73,8 +71,6 @@ export interface UpdateConfigRequest {
   zelle_contact?: string | null;
   min_confirmations?: number;
 }
-
-// --- Payout method type (for response shapes) ---
 
 export type PayoutMethod = "wallet" | "qvapay" | "zelle";
 
