@@ -4,8 +4,8 @@ import type {
   AddressRequest,
   TransactionsRequest,
   AssignWalletResponse,
-  BalanceResponse,
-  TransactionsResponse,
+  EvmBalanceResponse,
+  EvmTransactionsResponse,
 } from "../types";
 
 export class WalletsResource {
@@ -16,10 +16,10 @@ export class WalletsResource {
   }
 
   balance(data: AddressRequest) {
-    return this.http.post<BalanceResponse>("/api/v2/wallets/balance", data);
+    return this.http.post<EvmBalanceResponse>("/api/v2/wallets/balance", data);
   }
 
   transactions(data: TransactionsRequest) {
-    return this.http.post<TransactionsResponse>("/api/v2/wallets/transactions", data);
+    return this.http.post<EvmTransactionsResponse>("/api/v2/wallets/transactions", data);
   }
 }
