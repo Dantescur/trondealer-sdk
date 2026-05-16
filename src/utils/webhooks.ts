@@ -1,8 +1,10 @@
 export async function verifyWebhookSignature(
   rawBody: string,
-  signatureHex: string,
+  signature: string,
   secret: string,
 ): Promise<boolean> {
+  const signatureHex = signature.replace(/^sha256=/, "");
+
   const encoder = new TextEncoder();
   const key = await crypto.subtle.importKey(
     "raw",
@@ -18,7 +20,6 @@ export async function verifyWebhookSignature(
   if (!hexPairs) return false;
   const sigArray = Uint8Array.from(hexPairs.map((byte) => parseInt(byte, 16)));
 
-  // Timing-safe comparison
   if (macArray.length !== sigArray.length) return false;
   let match = true;
   for (let i = 0; i < macArray.length; i++) {
