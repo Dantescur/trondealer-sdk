@@ -3,11 +3,13 @@ import { normalizeConfig } from "./config";
 import { FetchTransport, TronDealerHttpClient } from "./http";
 import { ClientsResource } from "./resources/clients";
 import { WalletsResource } from "./resources/wallets";
+import { TronResource } from "./resources/tron";
 import { verifyWebhookSignature } from "./utils/webhooks";
 
 export class TronDealer {
   public readonly clients: ClientsResource;
   public readonly wallets: WalletsResource;
+  public readonly tron: TronResource;
 
   constructor(options: TronDealerOptions = {}) {
     const config = normalizeConfig(options);
@@ -16,6 +18,7 @@ export class TronDealer {
 
     this.clients = new ClientsResource(httpClient);
     this.wallets = new WalletsResource(httpClient);
+    this.tron = new TronResource(httpClient);
   }
 
   verifyWebhook(rawBody: string, signature: string, secret: string) {
