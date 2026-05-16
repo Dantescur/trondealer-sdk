@@ -14,9 +14,9 @@ export async function verifyWebhookSignature(
 
   const mac = await crypto.subtle.sign("HMAC", key, encoder.encode(rawBody));
   const macArray = new Uint8Array(mac);
-  const sigArray = Uint8Array.from(
-    signatureHex.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16)),
-  );
+  const hexPairs = signatureHex.match(/.{1,2}/g);
+  if (!hexPairs) return false;
+  const sigArray = Uint8Array.from(hexPairs.map((byte) => parseInt(byte, 16)));
 
   // Timing-safe comparison
   if (macArray.length !== sigArray.length) return false;
