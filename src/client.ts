@@ -4,12 +4,14 @@ import { FetchTransport, TronDealerHttpClient } from "./http";
 import { ClientsResource } from "./resources/clients";
 import { WalletsResource } from "./resources/wallets";
 import { TronResource } from "./resources/tron";
+import { SolResource } from "./resources/sol";
 import { verifyWebhookSignature } from "./utils/webhooks";
 
 export class TronDealer {
   public readonly clients: ClientsResource;
   public readonly wallets: WalletsResource;
   public readonly tron: TronResource;
+  public readonly sol: SolResource;
 
   constructor(options: TronDealerOptions = {}) {
     const config = normalizeConfig(options);
@@ -19,6 +21,7 @@ export class TronDealer {
     this.clients = new ClientsResource(httpClient);
     this.wallets = new WalletsResource(httpClient);
     this.tron = new TronResource(httpClient);
+    this.sol = new SolResource(httpClient);
   }
 
   verifyWebhook(rawBody: string, signature: string, secret: string) {
