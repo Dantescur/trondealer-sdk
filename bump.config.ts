@@ -1,5 +1,5 @@
 import { defineConfig } from "bumpp";
 
 export default defineConfig({
-  execute: "pnpm run changelog && git add CHANGELOG.md",
+  execute: "pnpm run changelog && oxfmt CHANGELOG.md && git add CHANGELOG.md",
 });
