@@ -318,10 +318,19 @@ pnpm run lint       # Lint with oxlint
 pnpm run lint:fix   # Lint and auto-fix
 pnpm run fmt        # Format with oxfmt
 pnpm run fmt:check  # Check formatting
-pnpm run release    # Bump version and prepare release
+pnpm run changelog  # Generate/update CHANGELOG.md
+pnpm run release    # Bump version, update changelog, commit, tag, push
 ```
 
 Hooks (husky + lint-staged) auto-run `lint:fix` and `oxfmt` on staged files before each commit.
+
+### Releasing
+
+```bash
+pnpm run release
+```
+
+`bumpp` bumps the version, auto-generates `CHANGELOG.md` via the `execute` hook in `bump.config.ts`, commits everything, creates a git tag, and pushes to GitHub. The tag push triggers CI which publishes to npm and creates a GitHub Release with formatted release notes.
 
 ### Project Structure
 
