@@ -163,11 +163,6 @@ export interface Transaction {
 
 // --- Response envelope types ---
 
-export interface ApiResponse<T> {
-  success: boolean;
-  [key: string]: unknown;
-}
-
 export interface RegisterResponse {
   success: boolean;
   client: ClientFull;
