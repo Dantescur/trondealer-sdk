@@ -1,17 +1,12 @@
 # Tron Dealer V2 SDK
 
-TypeScript SDK for the Tron Dealer V2 API. Provides type-safe access to EVM
-wallet management across multiple networks (BSC, Ethereum, Polygon, Arbitrum,
-Base), including client registration, wallet assignment, balance queries,
-transaction history, and webhook verification.
+TypeScript SDK for the [Tron Dealer V2 API](https://trondealer.com). Provides type-safe access to wallet management across EVM networks (BSC, Ethereum, Polygon, Arbitrum, Base, Optimism, Avalanche), TRON (USDT TRC20), and Solana (USDT-SPL, USDC-SPL).
 
 ## Installation
 
 ```bash
 npm install @areitosa/trondealer-sdk
-# or
 pnpm add @areitosa/trondealer-sdk
-# or
 yarn add @areitosa/trondealer-sdk
 ```
 
@@ -34,8 +29,8 @@ const publicClient = new TronDealer();
 // Authenticated requests (after registration)
 const client = new TronDealer({
   apiKey: "td_your_api_key_here",
-  baseUrl: "https://trondealer.com", // optional, default shown
-  timeout: 15000, // optional, default: 10000ms
+  baseUrl: "https://trondealer.com",
+  timeout: 15000, // default: 10000ms
 });
 ```
 
@@ -49,61 +44,99 @@ const registered = await publicClient.clients.register({
   min_confirmations: 12,
   payout_method: "wallet",
   sweep_wallet_evm: "0xYourEVMAddressHere",
+  sweep_wallet_tron: "TCsHYKC27np7cGAxJEq55DnsGysejpFF11",
 });
 
 console.log("API Key:", registered.client.api_key);
-// Store this key securely - it is only returned once
 ```
 
-### Assign a Deposit Wallet
+### List Supported Networks
 
 ```typescript
-const assigned = await client.wallets.assign({
-  label: "user-12345", // optional identifier
+const networks = await publicClient.networks.list();
+console.log(networks.networks.map((n) => n.label));
+// ["BSC", "Ethereum", "Polygon", "Arbitrum", "Base", "Optimism", "Avalanche", "TRON", "Solana"]
+```
+
+### EVM Wallets
+
+```typescript
+// Assign a wallet
+const evmWallet = await client.wallets.assign({
+  label: "user-12345",
+  single_use: true, // auto-deactivate after first sweep
 });
+console.log("Address:", evmWallet.wallet.address);
+console.log("Single-use:", evmWallet.wallet.single_use);
 
-console.log("Wallet Address:", assigned.wallet.address);
-console.log("Status:", assigned.wallet.status);
-```
-
-### Check Wallet Balances
-
-```typescript
-const balanceResponse = await client.wallets.balance({
-  address: "0xAssignedWalletAddress",
+// Check balance
+const balance = await client.wallets.balance({
+  address: evmWallet.wallet.address,
 });
+console.log("Native:", balance.balances.NativeToken);
+console.log("USDT:", balance.balances.USDT);
+console.log("USDC:", balance.balances.USDC);
 
-// Balances are per-network with network-specific native tokens
-console.log("BSC BNB:", balanceResponse.balances.bsc.BNB);
-console.log("ETH USDT:", balanceResponse.balances.eth.USDT);
-console.log("POL USDC:", balanceResponse.balances.pol.USDC);
-```
-
-### Query Transaction History
-
-```typescript
-const transactionsResponse = await client.wallets.transactions({
-  address: "0xAssignedWalletAddress",
+// Transaction history
+const txs = await client.wallets.transactions({
+  address: evmWallet.wallet.address,
   limit: 25,
   offset: 0,
-  status:
-    "confirmed" | // optional filter: 'detected' | 'confirmed' | 'notified'
-    "swept",
+  status: "confirmed",
 });
+console.log(`Found ${txs.total} transactions`);
+```
 
-for (const tx of transactionsResponse.transactions) {
-  console.log(`${tx.asset} ${tx.amount} - ${tx.status}`);
-}
+### TRON Wallets
+
+```typescript
+// Assign a TRON wallet
+const tronWallet = await client.tron.assign({ label: "user-12345" });
+console.log("Address:", tronWallet.wallet.address);
+console.log("Activated:", tronWallet.wallet.activated);
+
+// Check TRX/USDT balances
+const tronBalance = await client.tron.balance({
+  address: tronWallet.wallet.address,
+});
+console.log("TRX:", tronBalance.balances.TRX.formatted);
+console.log("USDT:", tronBalance.balances.USDT.formatted);
+console.log("Activated:", tronBalance.activated);
+
+// Transaction history (address optional — omit for all client wallets)
+const tronTxs = await client.tron.transactions({
+  address: tronWallet.wallet.address,
+  limit: 20,
+});
+```
+
+### Solana Wallets
+
+```typescript
+// Assign a Solana wallet
+const solWallet = await client.sol.assign({ label: "user-12345" });
+
+// Check SOL/USDT/USDC balances
+const solBalance = await client.sol.balance({
+  address: solWallet.wallet.address,
+});
+console.log("SOL:", solBalance.balances.SOL.formatted);
+console.log("USDT:", solBalance.balances.USDT.formatted);
+console.log("USDC:", solBalance.balances.USDC.formatted);
+
+// Transaction history
+const solTxs = await client.sol.transactions({
+  address: solWallet.wallet.address,
+  limit: 20,
+});
 ```
 
 ### Manage Client Configuration
 
 ```typescript
-// Get current configuration
 const configResponse = await client.clients.me();
 console.log("Webhook configured:", configResponse.client.has_webhook_secret);
 
-// Update configuration
 const updatedResponse = await client.clients.update({
   webhook_url: "https://new-endpoint.com/webhook",
   min_confirmations: 20,
@@ -112,9 +145,7 @@ const updatedResponse = await client.clients.update({
 
 ## Webhook Verification
 
-Tron Dealer sends webhook notifications to your configured URL when deposits
-are detected or confirmed. Always verify the signature to ensure the request
-originates from Tron Dealer.
+Tron Dealer sends webhook notifications to your configured URL. Always verify the `X-Signature-256` header to authenticate the request.
 
 ```typescript
 import { verifyWebhookSignature } from "@areitosa/trondealer-sdk";
@@ -122,9 +153,8 @@ import express from "express";
 
 const app = express();
 
-// Use raw body parser for signature verification
 app.post("/webhooks/trondealer", express.raw({ type: "application/json" }), async (req, res) => {
-  const signature = req.headers["x-webhook-signature"] as string;
+  const signature = req.headers["x-signature-256"] as string;
   const secret = process.env.TRONDEALER_WEBHOOK_SECRET!;
   const rawBody = req.body.toString("utf-8");
 
@@ -136,23 +166,23 @@ app.post("/webhooks/trondealer", express.raw({ type: "application/json" }), asyn
 
   const payload = JSON.parse(rawBody);
 
-  // Process the webhook event
   if (payload.event === "transaction.confirmed") {
     const { data } = payload;
     console.log(`Confirmed: ${data.amount} ${data.asset} on ${data.network}`);
-    // Your business logic here
   }
 
   res.sendStatus(200);
 });
 ```
 
-### Webhook Payload Structure
+### Webhook Payloads
+
+**incoming / confirmed events** share the same `WebhookPayload` shape:
 
 ```typescript
 interface WebhookPayload {
   event: "transaction.incoming" | "transaction.confirmed";
-  timestamp: string; // ISO 8601
+  timestamp: string;
   data: {
     tx_hash: string;
     block_number: number;
@@ -162,7 +192,30 @@ interface WebhookPayload {
     amount: string;
     confirmations: number;
     wallet_label?: string | null;
-    network: "bsc" | "eth" | "pol";
+    network: "bsc" | "eth" | "pol" | "arb" | "base" | "opt" | "avax" | "tron" | "solana";
+  };
+}
+```
+
+**swept event** uses a different shape:
+
+```typescript
+interface WebhookSweptPayload {
+  event: "transaction.swept";
+  timestamp: string;
+  data: {
+    sweep_tx_hash?: string | null;
+    fee_tx_hash?: string | null;
+    funding_tx_hash?: string | null;
+    source_tx_hashes: string[];
+    asset: "USDT" | "USDC";
+    amount: string;
+    gross_amount: string;
+    fee_amount?: string | null;
+    destination: string;
+    wallet_address: string;
+    wallet_label?: string | null;
+    network: "bsc" | "eth" | "pol" | "arb" | "base" | "opt" | "avax" | "tron" | "solana";
   };
 }
 ```
@@ -182,25 +235,60 @@ try {
     console.error("Status:", error.status);
     console.error("Response:", error.response);
   } else {
-    // Network errors, timeouts, etc.
-    console.error("Request failed:", error);
+    console.error("Network error or timeout:", error);
   }
 }
 ```
 
 ## Type Definitions
 
-All request and response types are exported for use in your application:
+All request and response types are exported:
 
 ```typescript
 import type {
   RegisterRequest,
+  UpdateConfigRequest,
   ClientConfig,
+  ClientFull,
+  // EVM wallets
+  AssignRequest,
   AssignedWallet,
+  TransactionsRequest,
   Transaction,
+  EvmBalances,
+  EvmBalanceResponse,
+  EvmTransactionsResponse,
+  // TRON wallets
+  TronAssignRequest,
+  AssignedTronWallet,
+  TronTransactionsRequest,
+  TronTransaction,
+  TronBalanceEntry,
+  TronBalances,
+  // Solana wallets
+  SolAssignRequest,
+  AssignedSolWallet,
+  SolTransactionsRequest,
+  SolTransaction,
+  SolBalanceEntry,
+  SolBalances,
+  // Networks
+  NetworkInfo,
+  NetworkAsset,
+  // Webhooks
   WebhookPayload,
+  WebhookSweptPayload,
+  WebhookSweptData,
+  WebhookTransactionData,
+  WebhookNetwork,
+  // Enums
+  Network,
+  Asset,
   TransactionStatus,
+  WalletStatus,
+  WebhookEvent,
   PayoutMethod,
+  // Config
   TronDealerConfig,
   TronDealerOptions,
   Transport,
@@ -217,25 +305,19 @@ import type {
 
 ## Development
 
-### Clone and Install
-
 ```bash
 git clone https://github.com/Dantescur/trondealer-sdk.git
 cd trondealer-sdk
 pnpm install
-```
 
-### Available Scripts
-
-```bash
 pnpm run build      # Build ESM bundles with tsdown
-pnpm run dev        # Watch mode for development
+pnpm run dev        # Watch mode
 pnpm run typecheck  # Run TypeScript type checking
 pnpm run test       # Run tests with Vitest
 pnpm run lint       # Lint with oxlint
-pnpm run lint:fix   # Lint and auto-fix with oxlint
+pnpm run lint:fix   # Lint and auto-fix
 pnpm run fmt        # Format with oxfmt
-pnpm run fmt:check  # Check formatting without writing
+pnpm run fmt:check  # Check formatting
 pnpm run release    # Bump version and prepare release
 ```
 
@@ -245,27 +327,19 @@ Hooks (husky + lint-staged) auto-run `lint:fix` and `oxfmt` on staged files befo
 
 ```sh
 src/
-├── index.ts              # Public exports
-├── client.ts             # Main TronDealer class (config normalization, resource wiring)
-├── config.ts             # TronDealerConfig type + normalize function
-├── http.ts               # TronDealerHttpClient, Transport interface, TronDealerError
-├── types.ts              # API request/response types
+├── index.ts               # Public exports
+├── client.ts              # Main TronDealer class (5 resource properties)
+├── config.ts              # Config types + normalize function
+├── http.ts                # TronDealerHttpClient, Transport, TronDealerError
+├── types.ts               # API request/response types
 ├── resources/
-│   ├── clients.ts        # Client management endpoints
-│   └── wallets.ts        # Wallet and transaction endpoints
+│   ├── clients.ts         # Client management endpoints
+│   ├── wallets.ts         # EVM wallet endpoints
+│   ├── tron.ts            # TRON wallet endpoints
+│   ├── sol.ts             # Solana wallet endpoints
+│   └── networks.ts        # Network discovery endpoint
 └── utils/
-    └── webhooks.ts       # HMAC signature verification
-```
-
-## Building
-
-The SDK is bundled using tsdown, producing:
-
-- `dist/index.mjs` - ES Module build
-- `dist/index.d.mts` - TypeScript declarations
-
-```bash
-pnpm run build
+    └── webhooks.ts        # HMAC signature verification
 ```
 
 ## License
@@ -274,14 +348,12 @@ MIT License. See [LICENSE](./LICENSE) file for details.
 
 ## Support
 
-- Documentation: <https://github.com/Dantescur/trondealer-sdk>
-- Issues: <https://github.com/Dantescur/trondealer-sdk/issues>
-- API Reference: <https://trondealer.com/en/docs>
+- Issues: https://github.com/Dantescur/trondealer-sdk/issues
+- API Reference: https://trondealer.com/en/docs
 
 ## Security Considerations
 
-1. Store your API key and webhook secret in environment variables, never in
-   source code
+1. Store your API key and webhook secret in environment variables, never in source code
 2. Always verify webhook signatures before processing events
 3. Use HTTPS for all webhook endpoints
 4. Rotate your webhook secret periodically
