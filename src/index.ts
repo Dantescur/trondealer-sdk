@@ -1,3 +1,5 @@
+/** @module @areitosa/trondealer-sdk */
+
 export { TronDealer } from "./client";
 export { TronDealerError } from "./http";
 export { verifyWebhookSignature } from "./utils/webhooks";
