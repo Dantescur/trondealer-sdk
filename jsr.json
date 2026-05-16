@@ -4,10 +4,6 @@
   "version": "0.0.7",
   "license": "MIT",
   "exports": {
-    ".": "./dist/index.mjs",
-    "./types": "./dist/index.d.mts"
-  },
-  "publish": {
-    "exclude": ["!dist/"]
+    ".": "./src/index.ts"
   }
 }
