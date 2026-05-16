@@ -37,7 +37,9 @@ export class FetchTransport implements Transport {
       const data = (await res.json().catch(() => null)) as unknown;
 
       if (!res.ok) {
-        let errorMessage = `HTTP ${res.status} ${res.statusText}`;
+        let errorMessage = res.statusText
+          ? `HTTP ${res.status} ${res.statusText}`
+          : `HTTP ${res.status}`;
         if (data && typeof data === "object" && "error" in data) {
           const maybeError = (data as { error?: unknown }).error;
           if (typeof maybeError === "string" && maybeError) {
