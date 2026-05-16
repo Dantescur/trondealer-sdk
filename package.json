@@ -31,6 +31,7 @@
   "files": [
     "dist",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "type": "module",
@@ -47,6 +48,7 @@
     "dev": "tsdown --watch",
     "test": "vitest",
     "typecheck": "tsc --noEmit",
+    "changelog": "changelogithub --output CHANGELOG.md",
     "release": "bumpp",
     "prepublishOnly": "pnpm run build",
     "lint": "oxlint",
@@ -59,6 +61,7 @@
     "@types/node": "^25.5.0",
     "@typescript/native-preview": "7.0.0-dev.20260328.1",
     "bumpp": "^11.0.1",
+    "changelogithub": "^14.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "oxfmt": "^0.45.0",
