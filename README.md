@@ -143,6 +143,116 @@ const updatedResponse = await client.clients.update({
 });
 ```
 
+## Cross-Chain Swap
+
+Anonymous cross-chain stablecoin swap (`/api/v2/swap/*`). No authentication — per-IP rate limits only.
+
+```typescript
+// List enabled pairs
+const pairs = await client.swap.pairs();
+
+// Quote a swap
+const quote = await client.swap.quote({
+  asset_in: "USDT",
+  chain_in: "bsc",
+  asset_out: "USDC",
+  chain_out: "pol",
+  amount_in: 100,
+});
+
+// Create a swap from a quote
+const { swap } = await client.swap.create({
+  quote_id: quote.quote.id,
+  payout_address: "0xYourPayoutAddress",
+});
+
+console.log("Deposit to:", swap.deposit_address);
+```
+
+### Polling Swap Status
+
+The SDK does **not** implement SSE (`GET /api/v2/swap/{id}/stream`). Use `swap.get(id)` for reliable polling — it's the designated fallback in the API spec.
+
+```typescript
+let s = (await client.swap.get(swapId)).swap;
+while (
+  s.status === "waiting_deposit" ||
+  s.status === "deposit_detected" ||
+  s.status === "deposit_confirmed"
+) {
+  await new Promise((r) => setTimeout(r, 3000));
+  s = (await client.swap.get(swapId)).swap;
+}
+```
+
+If the user loses their cookie, recover with the deposit tx hash or payout address:
+
+```typescript
+await client.swap.unlock(swapId, { tx_hash: "0x..." });
+```
+
+### Vue 3 Composable
+
+```typescript
+// useSwapStatus.ts
+import { ref, onMounted, onUnmounted } from "vue";
+import { TronDealer } from "@areitosa/trondealer-sdk";
+import type { SwapStatus } from "@areitosa/trondealer-sdk";
+
+const td = new TronDealer();
+
+export function useSwapStatus(swapId: string) {
+  const status = ref<SwapStatus>("waiting_deposit");
+  const loading = ref(true);
+  const error = ref<string | null>(null);
+  let timer: ReturnType<typeof setInterval>;
+
+  const terminal = new Set<SwapStatus>([
+    "completed",
+    "expired",
+    "failed",
+    "refund_required",
+    "refunded",
+  ]);
+
+  async function poll() {
+    try {
+      const res = await td.swap.get(swapId);
+      status.value = res.swap.status;
+      loading.value = false;
+      if (terminal.has(res.swap.status)) clearInterval(timer);
+    } catch (e) {
+      error.value = (e as Error).message;
+      clearInterval(timer);
+    }
+  }
+
+  onMounted(async () => {
+    await poll();
+    timer = setInterval(poll, 3000);
+  });
+  onUnmounted(() => clearInterval(timer));
+
+  return { status, loading, error };
+}
+```
+
+```vue
+<script setup lang="ts">
+import { useSwapStatus } from "./useSwapStatus";
+const props = defineProps<{ swapId: string }>();
+const { status, loading, error } = useSwapStatus(props.swapId);
+</script>
+
+<template>
+  <span v-if="loading">Checking deposit...</span>
+  <span v-else-if="error" class="error">{{ error }}</span>
+  <span v-else
+    >Status: <strong>{{ status }}</strong></span
+  >
+</template>
+```
+
 ## Webhook Verification
 
 Tron Dealer sends webhook notifications to your configured URL. Always verify the `X-Signature-256` header to authenticate the request.
@@ -272,6 +382,15 @@ import type {
   SolTransaction,
   SolBalanceEntry,
   SolBalances,
+  // Swap
+  SwapStatus,
+  SwapPair,
+  SwapQuote,
+  SwapFull,
+  SwapPartial,
+  SwapQuoteRequest,
+  SwapCreateRequest,
+  SwapUnlockRequest,
   // Networks
   NetworkInfo,
   NetworkAsset,
@@ -346,7 +465,8 @@ src/
 │   ├── wallets.ts         # EVM wallet endpoints
 │   ├── tron.ts            # TRON wallet endpoints
 │   ├── sol.ts             # Solana wallet endpoints
-│   └── networks.ts        # Network discovery endpoint
+│   ├── networks.ts        # Network discovery endpoint
+│   └── swap.ts            # Cross-chain swap endpoints
 └── utils/
     └── webhooks.ts        # HMAC signature verification
 ```
