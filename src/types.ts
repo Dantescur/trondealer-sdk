@@ -403,3 +403,128 @@ export interface WebhookSweptData {
 export interface ErrorResponse {
   error: string;
 }
+
+// --- Swap types ---
+
+export type SwapStatus =
+  | "waiting_deposit"
+  | "deposit_detected"
+  | "deposit_confirmed"
+  | "compliance_review"
+  | "payout_processing"
+  | "payout_sent"
+  | "completed"
+  | "expired"
+  | "failed"
+  | "refund_required"
+  | "refunded";
+
+export interface SwapPair {
+  asset_in: Asset;
+  chain_in: string;
+  asset_out: Asset;
+  chain_out: string;
+  min_amount: number;
+  max_amount: number;
+  fee_pct: number;
+}
+
+export interface SwapQuoteRequest {
+  asset_in: Asset;
+  chain_in: string;
+  asset_out: Asset;
+  chain_out: string;
+  amount_in: number;
+}
+
+export interface SwapQuote {
+  id: string;
+  asset_in: string;
+  chain_in: string;
+  asset_out: string;
+  chain_out: string;
+  amount_in: number;
+  amount_out: number;
+  rate: number;
+  fee_pct: number;
+  expires_at: string;
+}
+
+export interface SwapCreateRequest {
+  quote_id: string;
+  payout_address: string;
+}
+
+export interface SwapFull {
+  id: string;
+  asset_in: string;
+  chain_in: string;
+  asset_out: string;
+  chain_out: string;
+  amount_in: number;
+  amount_out: number;
+  fee_pct: number;
+  deposit_address: string;
+  payout_address: string;
+  status: SwapStatus;
+  confirmations?: number | null;
+  deposit_tx_hash?: string | null;
+  deposit_amount_actual?: number | null;
+  payout_amount_final?: number | null;
+  payout_tx_hash?: string | null;
+  sweep_tx_hash?: string | null;
+  error_message?: string | null;
+  expires_at: string;
+  deposit_detected_at?: string | null;
+  deposit_confirmed_at?: string | null;
+  payout_sent_at?: string | null;
+  completed_at?: string | null;
+  created_at: string;
+}
+
+export interface SwapPartial {
+  id: string;
+  asset_in: string;
+  chain_in: string;
+  asset_out: string;
+  chain_out: string;
+  amount_in: number;
+  amount_out: number;
+  fee_pct: number;
+  deposit_address?: string | null;
+  status: SwapStatus;
+  expires_at: string;
+  created_at: string;
+}
+
+export interface SwapUnlockRequest {
+  tx_hash?: string | null;
+  payout_address?: string | null;
+}
+
+// --- Swap response envelopes ---
+
+export interface SwapPairsResponse {
+  success: boolean;
+  pairs: SwapPair[];
+}
+
+export interface SwapQuoteResponse {
+  success: boolean;
+  quote: SwapQuote;
+}
+
+export interface SwapCreateResponse {
+  success: boolean;
+  swap: SwapFull;
+}
+
+export interface SwapGetResponse {
+  success: boolean;
+  swap: SwapFull;
+}
+
+export interface SwapUnlockResponse {
+  success: boolean;
+  swap: SwapFull;
+}
