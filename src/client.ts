@@ -6,6 +6,7 @@ import { WalletsResource } from "./resources/wallets";
 import { TronResource } from "./resources/tron";
 import { SolResource } from "./resources/sol";
 import { NetworksResource } from "./resources/networks";
+import { SwapResource } from "./resources/swap";
 import { verifyWebhookSignature } from "./utils/webhooks";
 
 export class TronDealer {
@@ -14,6 +15,7 @@ export class TronDealer {
   public readonly tron: TronResource;
   public readonly sol: SolResource;
   public readonly networks: NetworksResource;
+  public readonly swap: SwapResource;
 
   constructor(options: TronDealerOptions = {}) {
     const config = normalizeConfig(options);
@@ -25,6 +27,7 @@ export class TronDealer {
     this.tron = new TronResource(httpClient);
     this.sol = new SolResource(httpClient);
     this.networks = new NetworksResource(httpClient);
+    this.swap = new SwapResource(httpClient);
   }
 
   verifyWebhook(rawBody: string, signature: string, secret: string) {
