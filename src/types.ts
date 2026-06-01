@@ -1,5 +1,5 @@
 export type Network = "bsc" | "eth" | "pol" | "arb" | "base" | "opt" | "avax";
-export type Asset = "USDT" | "USDC";
+export type Asset = "USDT" | "USDC" | "BTC";
 export type TransactionStatus = "detected" | "confirmed" | "notified" | "swept";
 export type WalletStatus = "active" | "inactive";
 export type WebhookEvent = "transaction.incoming" | "transaction.confirmed" | "transaction.swept";
@@ -263,6 +263,62 @@ export interface SolTransaction {
   wallet_id: string;
 }
 
+// --- SUI Wallet types ---
+
+export interface SuiAssignRequest {
+  label?: string;
+  single_use?: boolean;
+}
+
+export interface AssignedSuiWallet {
+  id: string;
+  address: string;
+  label?: string | null;
+  status: WalletStatus;
+  single_use: boolean;
+  created_at: string;
+}
+
+export interface SuiAddressRequest {
+  address: string;
+}
+
+export interface SuiBalanceEntry {
+  raw: string;
+  formatted: string;
+}
+
+export interface SuiBalances {
+  SUI: SuiBalanceEntry;
+  USDC: SuiBalanceEntry;
+}
+
+export interface SuiTransactionsRequest {
+  address?: string;
+  limit?: number;
+  offset?: number;
+  status?: TransactionStatus;
+}
+
+export interface SuiTransaction {
+  id: string;
+  tx_digest: string;
+  coin_object_id: string;
+  checkpoint?: string | null;
+  block_time?: string | null;
+  from_address?: string | null;
+  to_address: string;
+  asset: "USDC";
+  amount: string;
+  amount_raw: string;
+  confirmations: number;
+  status: TransactionStatus;
+  webhook_sent: boolean;
+  created_at: string;
+  updated_at: string;
+  wallet_id: string;
+}
+
 // --- Response envelope types ---
 
 // EVM
@@ -333,6 +389,24 @@ export interface SolTransactionsResponse {
   transactions: SolTransaction[];
 }
 
+// SUI
+export interface SuiAssignWalletResponse {
+  success: boolean;
+  wallet: AssignedSuiWallet;
+}
+
+export interface SuiBalanceResponse {
+  success: boolean;
+  address: string;
+  label?: string | null;
+  balances: SuiBalances;
+}
+
+export interface SuiTransactionsResponse {
+  success: boolean;
+  transactions: SuiTransaction[];
+}
+
 // Networks
 export interface NetworkInfo {
   key: string;
@@ -357,7 +431,7 @@ export interface NetworksResponse {
 
 // --- Webhook types ---
 
-export type WebhookNetwork = Network | "tron" | "solana";
+export type WebhookNetwork = Network | "tron" | "solana" | "sui" | "btc";
 
 export interface WebhookPayload {
   event: "transaction.incoming" | "transaction.confirmed";
@@ -373,11 +447,14 @@ export interface WebhookSweptPayload {
 
 export interface WebhookTransactionData {
   tx_hash: string;
+  vout_index?: number | null;
   block_number: number;
-  from_address: string;
+  from_address?: string | null;
   to_address: string;
   asset: Asset;
   amount: string;
+  amount_native: string;
+  price_usd: number;
   confirmations: number;
   wallet_label?: string | null;
   network: WebhookNetwork;
@@ -390,8 +467,12 @@ export interface WebhookSweptData {
   source_tx_hashes: string[];
   asset: Asset;
   amount: string;
+  amount_native: string;
   gross_amount: string;
+  gross_amount_native: string;
   fee_amount?: string | null;
+  fee_amount_native?: string | null;
+  price_usd: number;
   destination: string;
   wallet_address: string;
   wallet_label?: string | null;

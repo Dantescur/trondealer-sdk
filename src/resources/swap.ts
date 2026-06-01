@@ -29,6 +29,10 @@ export class SwapResource {
     return this.http.get<SwapGetResponse>(`/api/v2/swap/${id}`);
   }
 
+  stream(id: string): EventSource {
+    return new EventSource(`${this.http.baseUrl}/api/v2/swap/${id}/stream`);
+  }
+
   unlock(id: string, data: SwapUnlockRequest) {
     return this.http.post<SwapUnlockResponse>(`/api/v2/swap/${id}/unlock`, data);
   }

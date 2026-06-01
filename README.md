@@ -1,6 +1,8 @@
 # Tron Dealer V2 SDK
 
-TypeScript SDK for the [Tron Dealer V2 API](https://trondealer.com). Provides type-safe access to wallet management across EVM networks (BSC, Ethereum, Polygon, Arbitrum, Base, Optimism, Avalanche), TRON (USDT TRC20), and Solana (USDT-SPL, USDC-SPL).
+> **Disclaimer:** This SDK is an independent, community-maintained project and is not officially affiliated with, endorsed by, or coordinated with the Tron Dealer team. The Tron Dealer API is under active development — this SDK may lag behind the latest API changes. Always refer to the [official API documentation](https://trondealer.com/en/docs) for the most up-to-date specification.
+
+TypeScript SDK for the [Tron Dealer V2 API](https://trondealer.com). Provides type-safe access to wallet management across EVM networks (BSC, Ethereum, Polygon, Arbitrum, Base, Optimism, Avalanche), TRON (USDT TRC20), Solana (USDT-SPL, USDC-SPL), and SUI (USDC native).
 
 ## Installation
 
@@ -55,7 +57,7 @@ console.log("API Key:", registered.client.api_key);
 ```typescript
 const networks = await publicClient.networks.list();
 console.log(networks.networks.map((n) => n.label));
-// ["BSC", "Ethereum", "Polygon", "Arbitrum", "Base", "Optimism", "Avalanche", "TRON", "Solana"]
+// ["BSC", "Ethereum", "Polygon", "Arbitrum", "Base", "Optimism", "Avalanche", "TRON", "Solana", "SUI"]
 ```
 
 ### EVM Wallets
@@ -143,6 +145,26 @@ const updatedResponse = await client.clients.update({
 });
 ```
 
+### SUI Wallets
+
+```typescript
+// Assign a SUI wallet
+const suiWallet = await client.sui.assign({ label: "user-12345" });
+
+// Check SUI/USDC balances
+const suiBalance = await client.sui.balance({
+  address: suiWallet.wallet.address,
+});
+console.log("SUI:", suiBalance.balances.SUI.formatted);
+console.log("USDC:", suiBalance.balances.USDC.formatted);
+
+// Transaction history
+const suiTxs = await client.sui.transactions({
+  address: suiWallet.wallet.address,
+  limit: 20,
+});
+```
+
 ## Cross-Chain Swap
 
 Anonymous cross-chain stablecoin swap (`/api/v2/swap/*`). No authentication — per-IP rate limits only.
@@ -169,9 +191,25 @@ const { swap } = await client.swap.create({
 console.log("Deposit to:", swap.deposit_address);
 ```
 
+### Streaming Swap Status (SSE)
+
+The SDK provides `swap.stream(id)` which returns an `EventSource` connected to the SSE endpoint. Use it for real-time updates:
+
+```typescript
+const source = client.swap.stream(swapId);
+source.addEventListener("snapshot", (event) => {
+  const data = JSON.parse(event.data);
+  console.log("Swap state:", data);
+});
+source.addEventListener("terminal", () => {
+  console.log("Swap reached terminal state");
+  source.close();
+});
+```
+
 ### Polling Swap Status
 
-The SDK does **not** implement SSE (`GET /api/v2/swap/{id}/stream`). Use `swap.get(id)` for reliable polling — it's the designated fallback in the API spec.
+Use `swap.get(id)` for reliable polling fallback when SSE is unavailable:
 
 ```typescript
 let s = (await client.swap.get(swapId)).swap;
@@ -295,14 +333,28 @@ interface WebhookPayload {
   timestamp: string;
   data: {
     tx_hash: string;
+    vout_index?: number | null;
     block_number: number;
-    from_address: string;
+    from_address?: string | null;
     to_address: string;
-    asset: "USDT" | "USDC";
+    asset: "USDT" | "USDC" | "BTC";
     amount: string;
+    amount_native: string;
+    price_usd: number;
     confirmations: number;
     wallet_label?: string | null;
-    network: "bsc" | "eth" | "pol" | "arb" | "base" | "opt" | "avax" | "tron" | "solana";
+    network:
+      | "bsc"
+      | "eth"
+      | "pol"
+      | "arb"
+      | "base"
+      | "opt"
+      | "avax"
+      | "tron"
+      | "solana"
+      | "sui"
+      | "btc";
   };
 }
 ```
@@ -318,14 +370,29 @@ interface WebhookSweptPayload {
     fee_tx_hash?: string | null;
     funding_tx_hash?: string | null;
     source_tx_hashes: string[];
-    asset: "USDT" | "USDC";
+    asset: "USDT" | "USDC" | "BTC";
     amount: string;
+    amount_native: string;
     gross_amount: string;
+    gross_amount_native: string;
     fee_amount?: string | null;
+    fee_amount_native?: string | null;
+    price_usd: number;
     destination: string;
     wallet_address: string;
     wallet_label?: string | null;
-    network: "bsc" | "eth" | "pol" | "arb" | "base" | "opt" | "avax" | "tron" | "solana";
+    network:
+      | "bsc"
+      | "eth"
+      | "pol"
+      | "arb"
+      | "base"
+      | "opt"
+      | "avax"
+      | "tron"
+      | "solana"
+      | "sui"
+      | "btc";
   };
 }
 ```
@@ -382,6 +449,13 @@ import type {
   SolTransaction,
   SolBalanceEntry,
   SolBalances,
+  // SUI wallets
+  SuiAssignRequest,
+  AssignedSuiWallet,
+  SuiTransactionsRequest,
+  SuiTransaction,
+  SuiBalanceEntry,
+  SuiBalances,
   // Swap
   SwapStatus,
   SwapPair,
@@ -456,7 +530,7 @@ pnpm run release
 ```sh
 src/
 ├── index.ts               # Public exports
-├── client.ts              # Main TronDealer class (5 resource properties)
+├── client.ts              # Main TronDealer class (6 resource properties)
 ├── config.ts              # Config types + normalize function
 ├── http.ts                # TronDealerHttpClient, Transport, TronDealerError
 ├── types.ts               # API request/response types
@@ -465,6 +539,7 @@ src/
 │   ├── wallets.ts         # EVM wallet endpoints
 │   ├── tron.ts            # TRON wallet endpoints
 │   ├── sol.ts             # Solana wallet endpoints
+│   ├── sui.ts             # SUI wallet endpoints
 │   ├── networks.ts        # Network discovery endpoint
 │   └── swap.ts            # Cross-chain swap endpoints
 └── utils/

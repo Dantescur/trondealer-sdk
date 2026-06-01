@@ -5,6 +5,7 @@ import { ClientsResource } from "./resources/clients";
 import { WalletsResource } from "./resources/wallets";
 import { TronResource } from "./resources/tron";
 import { SolResource } from "./resources/sol";
+import { SuiResource } from "./resources/sui";
 import { NetworksResource } from "./resources/networks";
 import { SwapResource } from "./resources/swap";
 import { verifyWebhookSignature } from "./utils/webhooks";
@@ -14,6 +15,7 @@ export class TronDealer {
   public readonly wallets: WalletsResource;
   public readonly tron: TronResource;
   public readonly sol: SolResource;
+  public readonly sui: SuiResource;
   public readonly networks: NetworksResource;
   public readonly swap: SwapResource;
 
@@ -26,6 +28,7 @@ export class TronDealer {
     this.wallets = new WalletsResource(httpClient);
     this.tron = new TronResource(httpClient);
     this.sol = new SolResource(httpClient);
+    this.sui = new SuiResource(httpClient);
     this.networks = new NetworksResource(httpClient);
     this.swap = new SwapResource(httpClient);
   }

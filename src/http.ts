@@ -59,7 +59,7 @@ export class FetchTransport implements Transport {
 export class TronDealerHttpClient {
   constructor(
     private readonly transport: Transport,
-    private readonly baseUrl: string,
+    readonly baseUrl: string,
     private readonly apiKey?: string,
   ) {}
 
